@@ -30,9 +30,7 @@
             <div class="row">
               <div class="col-8"></div>
               <div class="col-4">
-                <button type="submit" class="btn btn-primary btn-block" :disabled="isLoading">
-                  {{ isLoading ? 'Loading...' : 'Sign In' }}
-                </button>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
               </div>
             </div>
           </form>
@@ -48,19 +46,21 @@
 <script setup>
 import { ref } from 'vue';
 import { useAuthStore } from '../../stores/auth';
+import { LoadingModal, CloseModal } from '@/functions/swal';
 
 const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const errorMsg = ref('');
-const isLoading = ref(false);
 
 const handleSubmit = async () => {
   errorMsg.value = '';
-  isLoading.value = true;
   try {
+    LoadingModal('Signing In...');
     await authStore.signin(email.value, password.value);
+    CloseModal();
   } catch (error) {
+    CloseModal();
     if (error.response && error.response.data.errors) {
       errorMsg.value = Object.values(error.response.data.errors)[0][0];
     } else if (error.response && error.response.data.message) {
@@ -68,8 +68,6 @@ const handleSubmit = async () => {
     } else {
       errorMsg.value = 'Sign in failed. Please try again.';
     }
-  } finally {
-    isLoading.value = false;
   }
 };
 </script>

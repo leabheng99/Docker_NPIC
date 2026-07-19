@@ -13,10 +13,13 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useAuthStore } from '../../stores/auth';
+import { LoadingModal, CloseModal } from '@/functions/swal';
 
 const authStore = useAuthStore();
 
-onMounted(() => {
-  authStore.signout();
+onMounted(async () => {
+  LoadingModal('Signing Out...');
+  await authStore.signout();
+  CloseModal();
 });
 </script>

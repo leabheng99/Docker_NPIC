@@ -1,9 +1,9 @@
 import Signin from '@/components/auth/Signin.vue';
 import Signout from '@/components/auth/Signout.vue';
 import Signup from '@/components/auth/Signup.vue';
+import VerifyEmail from '@/components/auth/VerifyEmail.vue';
 import Dashboard from '@/components/pages/Dashboard.vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,24 +12,32 @@ const router = createRouter({
       path: '/',
       name: 'auth.signin',
       component: Signin,
-      meta: { requiresGuest: true }
+      meta: { guarded: false },
     },
     {
       path: '/signout',
       name: 'auth.signout',
       component: Signout,
+      // This route has no guarded meta because it use for both authenticated and unauthenticated users.
+      // The authentication state will be handled in the Signout component.
     },
     {
       path: '/signup',
       name: 'auth.signup',
       component: Signup,
-      meta: { requiresGuest: true }
+      meta: { guarded: false },
+    },
+    {
+      path: '/verify/email',
+      name: 'auth.verify.email',
+      component: VerifyEmail,
+      meta: { guarded: false },
     },
     {
       path: '/dashboard',
       name: 'dashboard',
       component: Dashboard,
-      meta: { requiresAuth: true }
+      meta: { guarded: true },
     },
     {
       path: '/:pathMatch(.*)*',
@@ -37,17 +45,5 @@ const router = createRouter({
     }
   ],
 })
-
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
-  
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'auth.signin' });
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: 'dashboard' });
-  } else {
-    next();
-  }
-});
 
 export default router

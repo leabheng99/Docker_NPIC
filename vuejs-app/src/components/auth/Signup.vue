@@ -7,36 +7,46 @@
         </div>
         <div class="card-body">
           <p class="login-box-msg">Sign up for a new membership</p>
-          
-          <div v-if="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
-
-          <form @submit.prevent="handleSubmit">
+          <form @submit.prevent="signUp">
             <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Name" v-model="name" required />
+              <input type="text" v-model="user.name" class="form-control" placeholder="Name"
+                :class="{ 'is-invalid': !!userError.name }" />
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-user"></span>
                 </div>
               </div>
+              <div class="invalid-feedback">
+                {{ userError.name }}
+              </div>
             </div>
             <div class="input-group mb-3">
-              <input type="email" class="form-control" placeholder="Email" v-model="email" required />
+              <input type="email" v-model="user.email" class="form-control" placeholder="Email"
+                :class="{ 'is-invalid': !!userError.email }" />
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-envelope"></span>
                 </div>
               </div>
+              <div class="invalid-feedback">
+                {{ userError.email }}
+              </div>
             </div>
             <div class="input-group mb-3">
-              <input type="password" class="form-control" placeholder="Password" v-model="password" required />
+              <input type="password" v-model="user.password" class="form-control" placeholder="Password" autocomplete
+                :class="{ 'is-invalid': !!userError.password }" />
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-lock"></span>
                 </div>
               </div>
+              <div class="invalid-feedback">
+                {{ userError.password }}
+              </div>
             </div>
             <div class="input-group mb-3">
-              <input type="password" class="form-control" placeholder="Confirm Password" v-model="password_confirmation" required />
+              <input type="password" v-model="user.password_confirmation" class="form-control"
+                placeholder="Confirm Password" autocomplete />
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-lock"></span>
@@ -46,15 +56,22 @@
             <div class="row">
               <div class="col-8"></div>
               <div class="col-4">
-                <button type="submit" class="btn btn-primary btn-block" :disabled="isLoading">
-                  {{ isLoading ? 'Loading...' : 'Sign up' }}
-                </button>
+                <button type="submit" class="btn btn-primary btn-block">Sign up</button>
               </div>
             </div>
           </form>
-          <p class="mb-1 mt-3">
+          <p class="mb-1">
             <router-link :to="{ name: 'auth.signin' }" class="text-center">I already have an account</router-link>
           </p>
+          <hr>
+          <div v-if="signedUpEmail" class="mt-3">
+            <p>Signed up with <strong>{{ signedUpEmail }}</strong></p>
+            <p class="mb-3">
+              Didn't receive the verification email?
+            </p>
+            <button @click="sendVerificationEmail" class="btn btn-secondary btn-block">Resend Verification
+              Email</button>
+          </div>
         </div>
       </div>
     </div>
@@ -62,40 +79,84 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useAuthStore } from '../../stores/auth';
-import { useRouter } from 'vue-router';
-
-const authStore = useAuthStore();
+import { useRouter } from "vue-router";
+import { reactive, ref } from "vue";
+import { apiSignUp, apiSendVerificationEmail } from "@/functions/api/auth";
+import { LoadingModal, MessageModal, CloseModal } from "@/functions/swal";
 const router = useRouter();
 
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const password_confirmation = ref('');
-const errorMsg = ref('');
-const isLoading = ref(false);
+const user = reactive({
+  name: "",
+  email: "",
+  password: "",
+  password_confirmation: "",
+});
 
-const handleSubmit = async () => {
-  if (password.value !== password_confirmation.value) {
-    errorMsg.value = 'Passwords do not match';
-    return;
-  }
-  
-  errorMsg.value = '';
-  isLoading.value = true;
+const userError = reactive({
+  name: "",
+  email: "",
+  password: "",
+});
+
+const defaultUser = JSON.parse(JSON.stringify(user));
+const defaultUserError = JSON.parse(JSON.stringify(userError));
+
+function resetAllState() {
+  Object.assign(user, defaultUser);
+  Object.assign(userError, defaultUserError);
+}
+
+async function signUp() {
+  resetSignedUpEmail();
   try {
-    await authStore.signup(name.value, email.value, password.value, password_confirmation.value);
+    LoadingModal('Signing Up...');
+    await apiSignUp(user);
+    signedUpEmail.value = user.email;
+    resetAllState();
+    return MessageModal({
+      icon: "success",
+      title: "Success",
+      text: "Your account has been created successfully."
+    });
   } catch (error) {
-    if (error.response && error.response.data.errors) {
-      errorMsg.value = Object.values(error.response.data.errors)[0][0];
-    } else if (error.response && error.response.data.message) {
-      errorMsg.value = error.response.data.message;
-    } else {
-      errorMsg.value = 'Sign up failed. Please try again.';
+    const { response } = error;
+    if (!response) {
+      return MessageModal({ icon: "error", title: "Error", text: error.message });
     }
-  } finally {
-    isLoading.value = false;
+    const { status, data } = response;
+    if (status === 422) {
+      Object.keys(userError).forEach((key) => {
+        userError[key] = data.errors[key]
+          ? data.errors[key][0]
+          : "";
+      });
+      return CloseModal();
+    }
+    return MessageModal({ icon: "error", title: "Error", text: data.message });
   }
-};
+}
+
+const signedUpEmail = ref("");
+async function sendVerificationEmail() {
+  try {
+    LoadingModal('Requesting verification email...');
+    const response = await apiSendVerificationEmail(signedUpEmail.value);
+    const { data } = response;
+    return MessageModal({
+      icon: "success",
+      title: "Success",
+      text: data.message
+    });
+  } catch (error) {
+    const { response } = error;
+    if (!response) {
+      return MessageModal({ icon: "error", title: "Error", text: error.message });
+    }
+    const { data } = response;
+    return MessageModal({ icon: "error", title: "Error", text: data.message });
+  }
+}
+function resetSignedUpEmail() {
+  signedUpEmail.value = "";
+}
 </script>
