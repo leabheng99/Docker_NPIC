@@ -13,6 +13,15 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.token,
   },
   actions: {
+    setState(user) {
+      this.user = user;
+      localStorage.setItem('user', JSON.stringify(this.user));
+    },
+    setSanctumToken(token) {
+      this.token = token;
+      localStorage.setItem('token', this.token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+    },
     async signin(email, password) {
       try {
         const response = await axios.post(`${API_URL}/signin`, { email, password });
