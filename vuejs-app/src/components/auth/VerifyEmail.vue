@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="card card-outline card-primary">
         <div class="card-header text-center">
-          <router-link to="/" class="h1"><img src="/img/npic_logo.webp" alt="NPIC Logo" style="max-width: 100%; height: auto; padding-top: 10px;"></router-link>
+          <router-link to="/" class="h1"><img src="@/assets/images/npic_logo.webp" alt="NPIC Logo" style="max-width: 100%; height: auto; padding-top: 10px;"></router-link>
         </div>
         <div class="card-body">
           <div v-if="status" :class="{

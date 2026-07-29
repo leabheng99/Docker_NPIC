@@ -1,26 +1,28 @@
 <template>
-  <div class="wrapper">
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light p-3 ml-0">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <router-link :to="{ name: 'auth.signout' }" class="nav-link text-danger">
-            <i class="fas fa-sign-out-alt"></i> Sign out
-          </router-link>
-        </li>
-      </ul>
-    </nav>
-    <div class="content-wrapper p-4 ml-0">
-      <div class="alert alert-success" role="alert" v-if="authStore.user">
-        <h4 class="alert-heading">Welcome, {{ authStore.user.name }}!</h4>
-        <p>You are logged in successfully with email: {{ authStore.user.email }}</p>
-        <hr>
-        <p class="mb-0">This is your dashboard. Everything is working correctly.</p>
+  <div class="content-wrapper" style="min-height: 1175px;">
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Dashboard</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="container-fluid">
+
       </div>
     </div>
   </div>
 </template>
-
 <script setup>
-import { useAuthStore } from '../../stores/auth';
-const authStore = useAuthStore();
+import { useUserStore } from "@/stores/user";
+const userStore = useUserStore();
 </script>

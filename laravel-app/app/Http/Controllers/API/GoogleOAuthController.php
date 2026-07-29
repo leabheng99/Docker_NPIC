@@ -14,7 +14,10 @@ class GoogleOAuthController extends Controller
     {
         $callback_url = $request->query('callback_url', '');
 
-        $redirectUrl = Socialite::driver('google')
+        /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
+        $driver = Socialite::driver('google');
+
+        $redirectUrl = $driver
             ->stateless()
             ->with(['state' => base64_encode($callback_url)])
             ->redirect()
@@ -27,7 +30,9 @@ class GoogleOAuthController extends Controller
     {
         $callback_url = base64_decode($request->query('state', ''));
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            /** @var \Laravel\Socialite\Two\GoogleProvider $driver */
+            $driver = Socialite::driver('google');
+            $googleUser = $driver->stateless()->user();
         } catch (\Exception $e) {
             return redirect($callback_url . '?error=google_oauth_failed');
         }
