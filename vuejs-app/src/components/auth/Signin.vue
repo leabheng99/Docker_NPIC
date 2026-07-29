@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="card card-outline card-primary">
         <div class="card-header text-center">
-          <router-link to="/" class="h1"><b>Admin</b>LTE</router-link>
+          <router-link to="/" class="h1"><img src="/img/npic_logo.webp" alt="NPIC Logo" style="max-width: 100%; height: auto; padding-top: 10px;"></router-link>
         </div>
         <div class="card-body">
           <p class="login-box-msg">Sign in to start your session</p>
@@ -39,6 +39,12 @@
               </div>
             </div>
           </form>
+          <div class="social-auth-links text-center mt-3 mb-3">
+            <p>- OR -</p>
+            <button @click="googleSignIn()" class="btn btn-block btn-danger">
+              <i class="fab fa-google mr-2"></i> Sign in with Google
+            </button>
+          </div>
           <p class="mb-1">
             <router-link :to="{ name: 'auth.signup' }" class="text-center">Register a new membership</router-link>
           </p>
@@ -56,9 +62,11 @@ import { useRouter } from "vue-router";
 import { reactive } from "vue";
 import { apiSignIn } from "@/functions/api/auth";
 import { LoadingModal, MessageModal, CloseModal } from "@/functions/swal";
-import { useAuthStore } from "@/stores/auth";
+import { useUserStore } from "@/stores/user";
+import { apiGoogleOAuthRedirect } from "@/functions/api/google-oauth";
+
 const router = useRouter();
-const userStore = useAuthStore();
+const userStore = useUserStore();
 
 const user = reactive({
   email: "",
@@ -105,4 +113,14 @@ async function signIn() {
     return MessageModal({ icon: "error", title: "Error", text: data.message });
   }
 }
+
+const googleSignIn = async () => {
+  try {
+    LoadingModal();
+    const response = await apiGoogleOAuthRedirect();
+    window.location.href = response.data.redirect_url;
+  } catch (error) {
+    return MessageModal({ icon: "error", title: "Error", text: error.response?.data?.message || error.message });
+  }
+};
 </script>
