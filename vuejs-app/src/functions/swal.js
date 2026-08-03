@@ -18,6 +18,7 @@ export function LoadingModal(title = 'Loading...') {
 }
 
 export function MessageModal({ icon = 'success', title = '', text = '' }) {
+    Swal.hideLoading();
     return Swal.fire({
         ...defaultOptions,
         icon,

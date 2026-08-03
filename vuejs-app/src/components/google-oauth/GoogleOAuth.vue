@@ -16,7 +16,8 @@ onMounted(async () => {
     LoadingModal("Processing Google authentication...");
     const error = route.query.error;
     if (error === 'google_oauth_failed') {
-      return MessageModal({ icon: "error", title: "Error", text: "Google authentication failed. Please try again." }, () => {
+      CloseModal();
+      return MessageModal({ icon: "error", title: "Error", text: "Google authentication failed. Please try again." }).then(() => {
         return router.replace({ name: 'auth.signin' });
       });
     }
@@ -28,7 +29,8 @@ onMounted(async () => {
     CloseModal();
     return router.replace({ name: 'dashboard' });
   } catch (e) {
-    return MessageModal({ icon: "error", title: "Error", text: "Google authentication failed. Please try again." }, () => {
+    CloseModal();
+    return MessageModal({ icon: "error", title: "Error", text: "Google authentication failed. Please try again." }).then(() => {
       return router.replace({ name: 'auth.signin' });
     });
   }

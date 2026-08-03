@@ -11,7 +11,7 @@
           <img :src="emptyImage" class="img-circle elevation-2" alt="User Image" style="width: 33px; height: 33px; object-fit: cover;">
         </div>
         <div class="info">
-          <router-link :to="{ name: 'profile' }" class="d-block">{{ userStore.name }}</router-link>
+          <router-link :to="{ name: 'profile' }" class="d-block">{{ userStore.user?.name }}</router-link>
         </div>
       </div>
 
