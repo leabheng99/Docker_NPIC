@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\GoogleOAuthController;
+use App\Http\Controllers\API\GithubOAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/signup', [AuthController::class, 'signup']);
@@ -17,6 +18,12 @@ Route::prefix('google')->group(function () {
     Route::get('/oauth/redirect', [GoogleOAuthController::class, 'googleOAuthRedirect']);
     Route::get('/oauth/callback', [GoogleOAuthController::class, 'googleOAuthCallback']);
     Route::post('/oauth/exchange/token', [GoogleOAuthController::class, 'googleOAuthExchangeToken'])->middleware('auth:sanctum');
+});
+
+Route::prefix('github')->group(function () {
+    Route::get('/oauth/redirect', [GithubOAuthController::class, 'githubOAuthRedirect']);
+    Route::get('/oauth/callback', [GithubOAuthController::class, 'githubOAuthCallback']);
+    Route::post('/oauth/exchange/token', [GithubOAuthController::class, 'githubOAuthExchangeToken'])->middleware('auth:sanctum');
 });
 
 Route::middleware('auth:sanctum')->group(function () {

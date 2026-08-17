@@ -44,6 +44,9 @@
             <button @click="googleSignIn()" class="btn btn-block btn-danger">
               <i class="fab fa-google mr-2"></i> Sign in with Google
             </button>
+            <button @click="githubSignIn()" class="btn btn-block btn-dark mt-2">
+              <i class="fab fa-github mr-2"></i> Sign in with Github
+            </button>
           </div>
           <p class="mb-1">
             <router-link :to="{ name: 'auth.signup' }" class="text-center">Register a new membership</router-link>
@@ -64,6 +67,7 @@ import { apiSignIn } from "@/functions/api/auth";
 import { LoadingModal, MessageModal, CloseModal } from "@/functions/swal";
 import { useUserStore } from "@/stores/user";
 import { apiGoogleOAuthRedirect } from "@/functions/api/google-oauth";
+import { apiGithubOAuthRedirect } from "@/functions/api/github-oauth";
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -118,6 +122,16 @@ const googleSignIn = async () => {
   try {
     LoadingModal();
     const response = await apiGoogleOAuthRedirect();
+    window.location.href = response.data.redirect_url;
+  } catch (error) {
+    return MessageModal({ icon: "error", title: "Error", text: error.response?.data?.message || error.message });
+  }
+};
+
+const githubSignIn = async () => {
+  try {
+    LoadingModal();
+    const response = await apiGithubOAuthRedirect();
     window.location.href = response.data.redirect_url;
   } catch (error) {
     return MessageModal({ icon: "error", title: "Error", text: error.response?.data?.message || error.message });

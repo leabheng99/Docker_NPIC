@@ -9,7 +9,8 @@ const defaultOptions = {
 export function LoadingModal(title = 'Loading...') {
     Swal.fire({
         ...defaultOptions,
-        title: title,
+        width: '200px',
+        title: 'Loading...',
         allowOutsideClick: false,
         didOpen: () => {
             Swal.showLoading();

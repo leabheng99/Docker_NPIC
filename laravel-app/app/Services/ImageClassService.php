@@ -1,29 +1,64 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Services;
 
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
-class CreatePasswordRequest extends FormRequest
+class ImageClassService
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    protected string $disk;
+    protected string $path;
+
+    public function __construct(string $path = 'profiles', string $disk = 'public')
     {
-        return true;
+        $this->path = $path;
+        $this->disk = $disk;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public static function forUserModel(): self
     {
-        return [
-            'new_password' => 'required|string|min:6|max:10|confirmed',
-        ];
+        return new self('profiles', 'public');
+    }
+
+    public function store(UploadedFile $file): string
+    {
+        return $file->store($this->path, $this->disk);
+    }
+
+    public function delete(?string $path): bool
+    {
+        if (empty($path)) {
+            return false;
+        }
+
+        if (Storage::disk($this->disk)->exists($path)) {
+            return Storage::disk($this->disk)->delete($path);
+        }
+
+        return false;
+    }
+
+    public function fullUrl(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        return url(Storage::disk($this->disk)->url($path));
+    }
+
+    public function thumbnailPath(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        // Without an image library, we just return the same path
+        return $path;
     }
 }

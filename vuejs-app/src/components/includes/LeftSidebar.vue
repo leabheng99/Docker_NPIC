@@ -1,17 +1,17 @@
 <template>
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <router-link to="/" class="brand-link">
-      <img :src="logoImage" alt="Chat System Logo" class="brand-image elevation-3" style="width: 33px; height: 33px; margin-top: -3px; border-radius: 4px; object-fit: contain;">
-      <span class="brand-text font-weight-bold" style="font-size: 1.2rem;">Chat System</span>
+      <img :src="logoImage" alt="Chat System Logo" class="brand-image elevation-3" style="opacity: .8; width: 34px; height: 34px; max-height: none; object-fit: contain; margin-top: 0;">
+      <span class="brand-text font-weight-light">Chat System</span>
     </router-link>
 
     <div class="sidebar">
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img :src="emptyImage" class="img-circle elevation-2" alt="User Image" style="width: 33px; height: 33px; object-fit: cover;">
+          <img :src="userStore.profile_thumbnail || emptyImage" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <router-link :to="{ name: 'profile' }" class="d-block">{{ userStore.user?.name }}</router-link>
+          <router-link :to="{ name: 'profile' }" class="d-block">{{ userStore.name }}</router-link>
         </div>
       </div>
 
@@ -59,7 +59,7 @@
 </template>
 <script setup>
 import emptyImage from '@/assets/images/emptyuser.png';
-import logoImage from '@/assets/images/logo-9411.png';
+import logoImage from '@/assets/images/Logo.png';
 import { useUserStore } from '@/stores/user';
 
 const userStore = useUserStore();

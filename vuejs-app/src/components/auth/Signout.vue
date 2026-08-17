@@ -12,14 +12,27 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import { useAuthStore } from '../../stores/auth';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
+import { apiSignOut } from '@/functions/api/auth';
 import { LoadingModal, CloseModal } from '@/functions/swal';
 
-const authStore = useAuthStore();
+const userStore = useUserStore();
+const router = useRouter();
 
 onMounted(async () => {
   LoadingModal('Signing Out...');
-  await authStore.signout();
-  CloseModal();
+  try {
+    const token = userStore.getSanctumToken();
+    if (token) {
+      await apiSignOut(token);
+    }
+  } catch (error) {
+    console.error('Signout failed:', error);
+  } finally {
+    userStore.reset();
+    CloseModal();
+    router.push({ name: 'auth.signin' });
+  }
 });
 </script>
